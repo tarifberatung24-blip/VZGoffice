@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types tests/auth-ownership.test.mjs && node --experimental-strip-types tests/document-draft-approval.test.mjs"
+    "test": "node --experimental-strip-types tests/auth-ownership.test.mjs && node --experimental-strip-types tests/document-draft-approval.test.mjs && node tests/route-smoke.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.7.0",

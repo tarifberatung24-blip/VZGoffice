@@ -2,7 +2,7 @@ export type Locale = 'bg' | 'de' | 'ru' | 'pl' | 'sr' | 'ro'
 export type CaseIntent = 'explanation' | 'reply' | 'complaint' | 'application' | 'objection' | 'cancellation' | 'document_request' | 'reminder' | 'free_email'
 export type CaseStatus = 'NEW' | 'UPLOADED' | 'EXTRACTING' | 'NEEDS_INFO' | 'DRAFTING' | 'NEEDS_CONFIRMATION' | 'APPROVED' | 'EXPORTED' | 'SENT' | 'WAITING_REPLY' | 'ACTION_REQUIRED' | 'CLOSED' | 'FAILED_RETRYABLE' | 'FAILED_FINAL' | 'HUMAN_REVIEW'
 
-type Row<T> = { Row: T; Insert: Partial<T>; Update: Partial<T> }
+type Row<T> = { Row: T; Insert: Partial<T>; Update: Partial<T>; Relationships: [] }
 export type Database = { public: { Tables: {
   profiles: Row<{ id: string; locale: Locale; display_name: string; created_at: string }>
   cases: Row<{ id: string; owner_id: string; title: string; intent: CaseIntent; ui_locale: Locale; conversation_locale: Locale; status: CaseStatus; institution: string | null; deadline: string | null; created_at: string }>
@@ -15,4 +15,4 @@ export type Database = { public: { Tables: {
   tasks: Row<{ id: string; owner_id: string; case_id: string; type: 'reminder' | 'human_review'; due_at: string | null; status: string; idempotency_key: string; created_at: string }>
   audit_events: Row<{ id: string; actor_id: string; case_id: string | null; action: string; metadata: Record<string, unknown>; created_at: string }>
   usage_counters: Row<{ user_id: string; period: string; ai_cases: number; tokens: number }>
-} } }
+}; Views: {}; Functions: {}; Enums: {}; CompositeTypes: {} } }

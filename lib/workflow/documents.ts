@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto'
 import { createAdminClient } from '../supabase/admin'
 import { getAuthenticatedUser } from '../supabase/auth'
+import { writeAuditEvent } from '../supabase/audit'
 
 const BUCKET = 'source-documents'
 const MAX_BYTES = 10 * 1024 * 1024
@@ -17,6 +18,8 @@ export async function uploadOwnedDocument(caseId: string, file: File) {
   const uploaded = await admin.storage.from(BUCKET).upload(path, bytes, { contentType: file.type, upsert: false }); if (uploaded.error) return { error: uploaded.error.message }
   const inserted = await admin.from('source_documents').insert({ id: documentId, owner_id: user.id, case_id: caseId, path, mime: file.type as 'application/pdf' | 'image/jpeg' | 'image/png', size_bytes: file.size, sha256, status: 'UPLOADED' }).select('*').single()
   if (inserted.error) { await admin.storage.from(BUCKET).remove([path]); return { error: inserted.error.message } }
+  const auditError = await writeAuditEvent(admin, user.id, caseId, 'document_uploaded', { document_id: documentId, mime: file.type, size_bytes: file.size })
+  if (auditError) { await admin.from('source_documents').delete().eq('id', documentId).eq('owner_id', user.id); await admin.storage.from(BUCKET).remove([path]); return { error: auditError } }
   return { document: inserted.data, manualReviewRequired: true }
 }
 

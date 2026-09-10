@@ -11,7 +11,8 @@ export function isCaseStatus(value: unknown): value is CaseStatus { return typeo
 export function sanitizeCaseCreate(input: Record<string, unknown>) {
   if (typeof input.title !== 'string' || input.title.trim().length < 1 || input.title.length > 200) return { error: 'Invalid title' as const }
   if (!isCaseIntent(input.intent) || !isLocale(input.ui_locale) || !isLocale(input.conversation_locale)) return { error: 'Invalid case fields' as const }
-  return { value: { title: input.title.trim(), intent: input.intent, ui_locale: input.ui_locale, conversation_locale: input.conversation_locale, institution: typeof input.institution === 'string' ? input.institution.slice(0, 200) : null, deadline: typeof input.deadline === 'string' ? input.deadline : null } }
+  if (input.institution != null || input.deadline != null) return { error: 'Institution and deadline are not editable in this baseline' as const }
+  return { value: { title: input.title.trim(), intent: input.intent, ui_locale: input.ui_locale, conversation_locale: input.conversation_locale } }
 }
 
 export function sanitizeCaseUpdate(input: Record<string, unknown>) {
@@ -20,7 +21,6 @@ export function sanitizeCaseUpdate(input: Record<string, unknown>) {
   if ('intent' in input) { if (!isCaseIntent(input.intent)) return { error: 'Invalid intent' as const }; value.intent = input.intent }
   if ('ui_locale' in input) { if (!isLocale(input.ui_locale)) return { error: 'Invalid UI locale' as const }; value.ui_locale = input.ui_locale }
   if ('conversation_locale' in input) { if (!isLocale(input.conversation_locale)) return { error: 'Invalid conversation locale' as const }; value.conversation_locale = input.conversation_locale }
-  if ('institution' in input) { if (input.institution !== null && (typeof input.institution !== 'string' || input.institution.length > 200)) return { error: 'Invalid institution' as const }; value.institution = input.institution }
-  if ('deadline' in input) { if (input.deadline !== null && (typeof input.deadline !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(input.deadline))) return { error: 'Invalid deadline' as const }; value.deadline = input.deadline }
+  if ('institution' in input || 'deadline' in input) return { error: 'Institution and deadline are not editable in this baseline' as const }
   return { value }
 }

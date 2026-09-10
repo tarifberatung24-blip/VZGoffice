@@ -1,5 +1,9 @@
 # Foundation Status
 
+> Historical snapshot from 2026-09-09. The lists below are not the current
+> application status. See [repository-audit.md](repository-audit.md) and
+> [integration.md](integration.md) for the integration candidate and remaining gates.
+
 ## Supabase
 
 Project: kintex-assistant-eu  

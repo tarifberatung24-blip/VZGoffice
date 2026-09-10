@@ -1,4 +1,4 @@
-# KintexBG AI Kommunikationsassistent
+#VZGoffice
 
 Standalone multilingual correspondence assistant. Status: foundation in development; not a production service.
 

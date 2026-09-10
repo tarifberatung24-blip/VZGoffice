@@ -3,11 +3,11 @@ import type { DraftGenerator, Translator, SafetyReviewer, DraftInput, DraftOutpu
 import type { Locale } from '../supabase/database'
 
 const hash = (value: string) => createHash('sha256').update(value).digest('hex')
-const find = (facts: ConfirmedFact[], key: string) => facts.find(f => f.key === key)?.value?.trim() ?? ''
+const find = (facts: ConfirmedFact[], key: string) => facts.findLast(f => f.key === key)?.value?.trim() ?? ''
 export const requiredFactKeys = ['recipient', 'subject', 'request']
 
 export class DeterministicTranslator implements Translator {
-  async translate(input: { subject: string; body: string; locale: Locale }) { if (input.locale === 'de') return { subject: input.subject, body: input.body }; return { subject: input.subject, body: `Übersetzung für ${input.locale}:\n\n${input.body}` } }
+  async translate(input: { subject: string; body: string; locale: Locale }) { return input.locale === 'de' ? { subject: input.subject, body: input.body } : null }
 }
 export class DeterministicDraftGenerator implements DraftGenerator {
   private readonly translator: Translator
@@ -16,7 +16,7 @@ export class DeterministicDraftGenerator implements DraftGenerator {
     const recipient = find(input.facts, 'recipient'); const subject = find(input.facts, 'subject'); const request = find(input.facts, 'request'); const missing = requiredFactKeys.filter(key => !find(input.facts, key))
     const body = `Sehr geehrte Damen und Herren,\n\n${request || '[Anliegen nach Bestätigung ergänzen]'}\n\nBitte teilen Sie mir die zugrunde liegenden Informationen mit.\n\nMit freundlichen Grüßen`
     const translated = await this.translator.translate({ subject: subject || 'Anfrage', body, locale: input.outputLocale }); const inputFactsHash = hash(JSON.stringify(input.facts)); const contentHash = hash(JSON.stringify({ subject_de: subject || 'Anfrage', body_de: body, recipient, attachments: input.documentIds }))
-    return { subject_de: subject || 'Anfrage', body_de: body, recipient, translation: translated.body, translation_locale: input.outputLocale, attachments: input.documentIds, missing, inputFactsHash, contentHash }
+    return { subject_de: subject || 'Anfrage', body_de: body, recipient, translation: translated?.body ?? null, translation_locale: translated ? input.outputLocale : null, attachments: input.documentIds, missing, inputFactsHash, contentHash }
   }
 }
 export class DeterministicSafetyReviewer implements SafetyReviewer {

@@ -24,18 +24,19 @@ export function AuthForm({ locale, mode }: { locale: Locale; mode: Mode }) {
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setError(''); setMessage('')
     if (!supabase) { setError(t.setupText); setBusy(false); return }
+    try {
     const result = mode === 'login'
       ? await supabase.auth.signInWithPassword({ email, password })
       : mode === 'signup'
-        ? await supabase.auth.signUp({ email, password, options: { data: { display_name: displayName, locale } } })
+        ? await supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/${locale}/dashboard`, data: { display_name: displayName, locale } } })
         : mode === 'forgot'
           ? await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth/callback?next=/${locale}/reset-password` })
           : await supabase.auth.updateUser({ password })
     if (result.error) setError(result.error.message || t.error)
-    else if (mode === 'login') { await syncProfile({ locale }); router.push(`/${locale}/dashboard`) }
-    else if (mode === 'signup') { await syncProfile({ locale, displayName }); setMessage(t.success) }
+    else if (mode === 'login') { router.push(`/${locale}/dashboard`); router.refresh() }
+    else if (mode === 'signup') { if ('data' in result && result.data && 'session' in result.data && result.data.session) { await syncProfile({ locale, displayName }); router.push(`/${locale}/dashboard`); router.refresh() } else setMessage(t.success) }
     else setMessage(mode === 'forgot' ? t.resetSent : t.success)
-    setBusy(false)
+    } catch { setError(t.error) } finally { setBusy(false) }
   }
 
   const title = t[mode]

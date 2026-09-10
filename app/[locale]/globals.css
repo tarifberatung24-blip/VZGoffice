@@ -1,0 +1,8 @@
+@import 'tailwindcss';
+
+:root { --background: #ffffff; --foreground: #172033; --card: #ffffff; --primary: #2563eb; --primary-foreground: #ffffff; --secondary: #eff6ff; --muted: #f8fafc; --muted-foreground: #64748b; --border: #dbe4f0; }
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body { margin: 0; background: var(--background); color: var(--foreground); font-family: Arial, Helvetica, sans-serif; }
+.bg-background { background: var(--background); } .text-foreground { color: var(--foreground); } .bg-card { background: var(--card); } .text-primary { color: var(--primary); } .bg-primary { background: var(--primary); } .text-primary-foreground { color: var(--primary-foreground); } .bg-secondary { background: var(--secondary); } .bg-muted { background: var(--muted); } .text-muted-foreground { color: var(--muted-foreground); } .border-border, .border { border-color: var(--border); }
+button, select, input { font: inherit; }

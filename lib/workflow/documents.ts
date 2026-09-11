@@ -3,6 +3,7 @@ import { createAdminClient } from '../supabase/admin'
 import { getAuthenticatedUser } from '../supabase/auth'
 import { writeAuditEvent } from '../supabase/audit'
 import { extractPdfPages } from './pdf-extraction'
+import { ocrScannedPdfPages } from './pdf-ocr'
 import { TesseractOcrProvider } from './ocr-provider'
 
 const BUCKET = 'source-documents'
@@ -38,10 +39,14 @@ export async function extractOwnedPdfDocument(documentId: string) {
   const downloaded = await admin.storage.from(BUCKET).download(document.path)
   if (downloaded.error) return { error: downloaded.error.message }
   try {
-    const pages = await extractPdfPages(new Uint8Array(await downloaded.data.arrayBuffer()))
+    const pdfBytes = new Uint8Array(await downloaded.data.arrayBuffer())
+    const extractedPages = await extractPdfPages(pdfBytes)
+    const scannedPageNumbers = extractedPages.filter((page) => page.needsOcr).map((page) => page.pageNo)
+    const ocrPages = scannedPageNumbers.length ? await ocrScannedPdfPages(pdfBytes, scannedPageNumbers) : []
+    const pages = extractedPages.map((page) => ocrPages.find((ocrPage) => ocrPage.pageNo === page.pageNo) ?? page)
     const inserted = await admin.from('document_pages').upsert(pages.map((page) => ({ owner_id: user.id, case_id: document.case_id, document_id: document.id, page_no: page.pageNo, text_content: page.text, confidence: page.confidence })), { onConflict: 'document_id,page_no' })
     if (inserted.error) throw new Error(inserted.error.message)
-    const status = pages.some((page) => page.needsOcr) ? 'FAILED' : 'READY'
+    const status = pages.some((page) => page.needsOcr || page.confidence < 0.75) ? 'NEEDS_CONFIRMATION' : 'READY'
     const updated = await admin.from('source_documents').update({ status }).eq('id', document.id).eq('owner_id', user.id)
     if (updated.error) throw new Error(updated.error.message)
     await writeAuditEvent(admin, user.id, document.case_id, 'document_extracted', { document_id: document.id, pages: pages.length, needs_ocr: pages.some((page) => page.needsOcr) })

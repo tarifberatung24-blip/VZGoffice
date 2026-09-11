@@ -11,6 +11,7 @@
     "test": "node --experimental-strip-types tests/auth-ownership.test.mjs && node --experimental-strip-types tests/document-draft-approval.test.mjs && node tests/route-smoke.mjs"
   },
   "dependencies": {
+    "@napi-rs/canvas": "^1.0.9",
     "@supabase/ssr": "0.7.0",
     "@supabase/supabase-js": "2.57.4",
     "lucide-react": "0.468.0",
@@ -19,7 +20,8 @@
     "pdfjs-dist": "^6.3.289",
     "react": "19.1.1",
     "react-dom": "19.1.1",
-    "server-only": "0.0.1"
+    "server-only": "0.0.1",
+    "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "4.3.3",

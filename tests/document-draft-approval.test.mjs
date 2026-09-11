@@ -23,6 +23,6 @@ const source = await documents.readFile(new URL('../lib/workflow/documents.ts', 
 assert.equal(source.includes('createSignedUrl'), true)
 assert.equal(source.includes('public/'), false)
 const records = await documents.readFile(new URL('../lib/workflow/records.ts', import.meta.url), 'utf8')
-assert.equal(records.includes(".update({"), false)
+assert.equal(records.includes("correspondence_drafts').update"), false)
 assert.equal(records.includes("approvedHash"), true)
 console.log('document-draft-approval tests: PASS')

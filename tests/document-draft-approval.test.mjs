@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { DeterministicDraftGenerator, DeterministicSafetyReviewer } from '../lib/workflow/deterministic.ts'
+import { approvalMatches } from '../lib/workflow/approval.ts'
 
 const generator = new DeterministicDraftGenerator()
 const base = { id:'case', owner_id:'user', title:'case', intent:'explanation', ui_locale:'bg', conversation_locale:'bg', status:'NEW', institution:null, deadline:null, created_at:new Date().toISOString() }
@@ -12,6 +13,11 @@ assert.equal(complete.body_de.includes('384,20'), false)
 assert.equal(complete.body_de.includes('Petrova'), false)
 assert.match(complete.contentHash, /^[a-f0-9]{64}$/)
 assert.match(complete.inputFactsHash, /^[a-f0-9]{64}$/)
+assert.equal(approvalMatches(complete.contentHash, complete.contentHash), true)
+assert.equal(approvalMatches(complete.contentHash, `${complete.contentHash.slice(0, -1)}0`), false)
+const revised = await generator.generate({ caseRecord: base, facts:[{key:'recipient',value:'Hausverwaltung'},{key:'subject',value:'Neue Anfrage'},{key:'request',value:'Bitte um Prüfung'}], outputLocale:'de', documentIds:['doc'] })
+assert.notEqual(revised.contentHash, complete.contentHash)
+assert.equal(approvalMatches(revised.contentHash, complete.contentHash), false)
 const documents = await import('node:fs/promises')
 const source = await documents.readFile(new URL('../lib/workflow/documents.ts', import.meta.url), 'utf8')
 assert.equal(source.includes('createSignedUrl'), true)

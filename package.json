@@ -11,9 +11,11 @@
     "test": "node --experimental-strip-types tests/auth-ownership.test.mjs && node --experimental-strip-types tests/document-draft-approval.test.mjs && node tests/route-smoke.mjs"
   },
   "dependencies": {
+    "@ai-sdk/groq": "^4.0.40",
     "@napi-rs/canvas": "^1.0.9",
     "@supabase/ssr": "0.7.0",
     "@supabase/supabase-js": "2.57.4",
+    "ai": "^7.0.97",
     "lucide-react": "0.468.0",
     "next": "16.3.4",
     "next-intl": "4.3.1",
@@ -21,7 +23,8 @@
     "react": "19.1.1",
     "react-dom": "19.1.1",
     "server-only": "0.0.1",
-    "tesseract.js": "^7.0.0"
+    "tesseract.js": "^7.0.0",
+    "zod": "^4.6.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "4.3.3",
